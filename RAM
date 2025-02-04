@@ -1,0 +1,110 @@
+1. High Memory Usage RAM
+1.1 Title
+System Resilience Validation under Sudden High Memory Usage
+
+1.2 Description
+The goal of this experiment is to evaluate how the system behaves when one (or several) of its critical servers undergo artificially high memory consumption. By inducing memory spikes, we aim to verify whether the rest of the application maintains acceptable availability and performance levels.
+
+2. Objectives
+Measure performance degradation (latency, error rate) when a server experiences high memory usage.
+Verify the system’s ability to reroute or balance traffic if a node becomes memory-saturated.
+Evaluate the effectiveness of monitoring and alerting during extreme memory usage.
+Identify configuration or architectural improvements to scale or mitigate the impact of memory saturation.
+3. Scope
+Critical application servers or services that could face memory bottlenecks.
+Load balancers or orchestration mechanisms (e.g., Kubernetes, autoscaling) for traffic distribution.
+Staging or pre-production environment closely resembling production in capacity and configuration.
+Assumptions include:
+
+Availability of observability tools for memory metrics, centralized logs, and monitoring dashboards.
+Access to a load testing tool (e.g., JMeter, Gatling) and a memory stress tool (e.g., stress-ng --vm or similar).
+4. Hypothesis
+“If there is a memory consumption spike reaching critical levels (e.g., 80–100% of available RAM) on a critical server, the overall system will continue to operate within the established latency and availability SLAs, without massive errors or outages.”
+
+5. Chaos Experiment Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+
+Launch a performance test with the expected transaction volume (e.g., 100 TPS or 50% of peak load).
+Initial Measurement
+
+Run this load for about 10 minutes to establish baseline metrics (p95/p99 latency, error rate, and normal memory usage).
+5.2 Memory Stress Injection
+Select the Target Server
+
+Choose a “critical” or representative server in the cluster.
+Inject Memory Stress
+
+Use a tool (e.g., stress-ng --vm 1 --vm-bytes 80% --timeout 300) to push memory usage to ~80–100% for 5–10 minutes (or longer, depending on experiment goals).
+Record Exact Time
+
+Note the start time of the stress to correlate metrics before, during, and after the event.
+5.3 Monitoring and Observation
+Application Latency
+
+Monitor p95 and p99 latency in real time.
+Check if the system remains within SLA thresholds (e.g., p95 < 500 ms).
+Error Rate
+
+Observe if there is an increase in HTTP 5xx errors or timeouts.
+Compare these values to the baseline.
+Server Resources
+
+Track memory usage (noting it should be 80–100% on the stressed server), CPU usage, and (if physical) hardware temperature or swap activity.
+Cluster Impact
+
+Check whether the load balancer redistributes traffic to other nodes.
+Evaluate overall system performance during the memory stress period.
+5.4 Sustaining and Scaling the Failure
+Maintain Saturation
+
+Let the memory stress tool run for the planned duration to observe system stability under high memory pressure.
+Gradual Increase (Optional)
+
+If needed, increase the number of memory stress processes or the allocated memory size to test more extreme scenarios.
+5.5 Recovery
+Stop Memory Stress Injection
+
+Terminate the memory stress process.
+Observe Recovery
+
+Check whether latency and error rate return to baseline.
+Determine if the system requires additional time to fully stabilize (e.g., garbage collection, cache reloading, etc.).
+6. Success Criteria
+Hypothesis Confirmed if:
+
+Latency remains within acceptable thresholds (e.g., p95 < 500 ms).
+The error rate stays below the defined threshold (e.g., <1%).
+The system continues responding without major disruptions (e.g., no out-of-memory errors).
+Hypothesis Refuted if:
+
+Response times significantly increase (e.g., p95 > 2–3x baseline).
+The error rate surges above acceptable levels (e.g., >5%).
+The system crashes, restarts, or experiences out-of-memory (OOM) events.
+7. Result Analysis and Conclusions
+Compare Against Baseline
+
+Determine how latency and availability changed compared to the initial measurements.
+Error Spikes
+
+Identify whether HTTP 5xx or timeout errors were transient or sustained, and if any OOM events occurred.
+Monitoring Observations
+
+Evaluate how effectively alerts and dashboards detected and signaled the high memory usage.
+Improvement Actions
+
+Adjust autoscaling or load-balancing strategies if necessary.
+Revisit memory settings, JVM heap sizes, or container memory limits.
+8. Recommendations
+Automate
+
+Integrate this Chaos Experiment into a CI/CD pipeline using tools like Gremlin or Litmus.
+Gradual Scenarios
+
+Test different levels of memory stress (e.g., 50%, 70%, 100%) to assess system resilience thresholds.
+Frequency
+
+Conduct these tests periodically or whenever significant infrastructure changes occur.
+Expand Coverage
+
+Add further chaos scenarios, such as CPU spikes or network latency, to broaden resilience validation.
