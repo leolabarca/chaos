@@ -1,0 +1,100 @@
+1. Experiment Title and Description
+Title: System Resilience Validation under Sudden High CPU Usage
+Description: The goal of this experiment is to evaluate how the system reacts when one (or several) of its critical servers experiences artificially high CPU usage, to verify whether the rest of the application maintains acceptable levels of availability and performance.
+
+2. Hypothesis
+Main Hypothesis:
+“If there is a CPU spike reaching around 80–100% on a critical server, the overall system will continue to operate within established latency and availability SLAs, and there will be no massive errors preventing transaction processing.”
+
+3. Objectives
+Measure performance degradation (latency, error rate) when a server is under high CPU load.
+Verify the system’s ability to reroute or balance traffic when one node is saturated.
+Evaluate the effectiveness of monitoring and alerting during extreme CPU usage.
+Identify configuration or architectural improvements to scale or mitigate the impact of CPU saturation.
+4. Scope and Assumptions
+Scope:
+Critical application servers or services that could face CPU bottlenecks.
+Load balancers or orchestration mechanisms (e.g., Kubernetes, autoscaling).
+Assumptions:
+A staging or pre-production environment closely resembles production in terms of capacity and configuration.
+Observability tools (CPU metrics, centralized logs, monitoring dashboards) are available.
+There is both a load testing tool (e.g., JMeter, Gatling) and a CPU stress tool (e.g., stress-ng or stress on Linux).
+5. Methodology and Experimental Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+Initiate a performance test with the expected transaction volume (e.g., 100 TPS or 50% of peak load).
+Initial Measurement
+Run this load for around 10 minutes to establish baseline metrics: p95/p99 latency, error rate, and normal CPU usage.
+5.2 CPU Stress Injection
+Select the Target Server
+Choose a “critical” or representative server in the cluster.
+Inject Stress
+Use a tool (e.g., stress-ng --cpu 1 --timeout 300) to push CPU usage to approximately 80–100% on that server for 5–10 minutes (or more, depending on your experiment goals).
+Record Exact Time
+Note the start time of the stress to correlate metrics before, during, and after the event.
+5.3 Monitoring and Observation
+Application Latency
+Monitor p95 and p99 latency in real time.
+Check whether the system remains within SLA thresholds (e.g., p95 < 500 ms).
+Error Rate
+Observe if there is an increase in HTTP 5xx errors or timeouts.
+Compare these values to the baseline.
+Server Resources
+Track CPU usage (noting that it should be 80–100% on the stressed server), memory usage, and (if physical) hardware temperature.
+Cluster Impact (if applicable)
+Verify whether the load balancer redistributes traffic to other nodes.
+Assess how the system performs overall during the stress period.
+5.4 Sustaining and Scaling the Failure
+Maintain Saturation
+Let the stress tool run for the planned duration to observe system stability.
+Gradual Increase (Optional)
+If needed, increase the number of CPU threads in the stress tool to test more extreme scenarios.
+5.5 Recovery
+Stop CPU Stress Injection
+Terminate the CPU stress tool.
+Observe Recovery
+Check whether latency and error rates return to baseline levels.
+Determine if the system requires additional time to fully stabilize (e.g., clearing queues, metric cooldown, etc.).
+6. Key Metrics
+Latency (p95, p99)
+Check whether latency exceeds established thresholds.
+Error Rate
+Measure the percentage of requests returning errors.
+CPU Usage
+Compare CPU usage on the “stressed” server to that of the other servers.
+Memory Usage
+Ensure the CPU stress does not trigger swapping or out-of-memory issues.
+Throughput (TPS)
+Observe if there is a drop in processed transactions per second.
+Alerting/Detection Time
+Verify how quickly alerting systems detect the high CPU usage and notify the team.
+7. Success Criteria
+Hypothesis Confirmed if:
+
+Latency remains within acceptable thresholds (e.g., p95 < 500 ms).
+Error rate stays below the defined threshold (e.g., <1%).
+The system continues to respond without major disruptions.
+Hypothesis Refuted if:
+
+Response times significantly increase (for example, p95 > 2–3x baseline).
+The error rate surges above acceptable levels (e.g., >5%).
+The system crashes or restarts unexpectedly.
+8. Analysis of Results and Conclusions
+Compare Against Baseline
+Identify how latency and availability were impacted.
+Error Spikes
+Determine if errors were transient or sustained.
+Monitoring Observations
+Evaluate how effectively dashboards and alerts detected and flagged the stress event.
+Improvement Actions
+Optimize load-balancing strategies or autoscaling policies (if applicable).
+Adjust thread pools, heap sizes, or CPU limits (in containerized environments).
+9. Recommendations
+Automate
+Integrate this chaos experiment into a continuous delivery or integration pipeline using tools such as Gremlin or Litmus.
+Gradual Scenarios
+Test different CPU stress levels (e.g., 50%, 70%, 100%) to see how the system behaves.
+Frequency
+Conduct these tests regularly or whenever major infrastructure changes occur.
+Expand Coverage
+Add more chaos scenarios related to network latency, database outages, or other potential bottlenecks.
