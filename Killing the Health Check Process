@@ -1,0 +1,115 @@
+1. Killing the Health Check Process
+1.1 Title
+System Resilience Validation by Terminating the Health Check Process
+
+1.2 Description
+The purpose of this experiment is to observe how the system behaves when the “health check” process—used by load generators or load balancers to verify a server’s availability—is suddenly terminated. By removing this vital indicator of service health, we aim to see if the system can accurately detect and handle instances that may still be functional but are mistakenly flagged as unhealthy (or vice versa).
+
+2. Objectives
+Measure the impact on availability when the health check process is terminated unexpectedly.
+Validate the load generator or load balancer’s response to losing health check signals (e.g., whether it prematurely routes traffic away from an otherwise healthy node).
+Evaluate the effectiveness of monitoring and alerting for detecting health check process failures.
+Identify improvements to the health check design or fallback mechanisms that keep the system stable even without direct health check signals.
+3. Scope
+Critical application servers or services relying on a dedicated health check process for instance validation.
+Load generators or load balancers (such as HAProxy, NGINX, or AWS ALB) configured to send requests to servers based on health check results.
+Staging or pre-production environment that closely resembles production, including identical health check intervals, thresholds, and process naming.
+Assumptions include:
+
+A known health check process name (e.g., health_check_service or hc_service) that can be safely terminated and restarted.
+Monitoring tools to detect when the process is not running and to observe changes in server status from the load balancer’s perspective.
+The ability to restore or restart the health check process quickly to avoid long-term disruption in the environment.
+4. Hypothesis
+“If the health check process is terminated on a critical server, the load generator (or load balancer) will detect the instance as unhealthy and reroute traffic accordingly, without causing unnecessary downtime or misrouting. The overall system will continue to meet its SLA for availability and performance.”
+
+5. Chaos Experiment Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+
+Launch a performance test (e.g., JMeter, Gatling) at a moderate or expected load (e.g., 50–100 TPS).
+Initial Measurement
+
+Run this traffic for about 10 minutes to establish baseline metrics: p95/p99 latency, error rate, and normal health check behavior (instances recognized as healthy).
+5.2 Terminating the Health Check Process
+Select the Target Server
+
+Identify a server that is deemed critical or representative, which has the health check process running.
+Kill the Health Check Process
+
+Use a command like kill -9 <process_id> or a chaos engineering tool to terminate the process.
+Record the exact timestamp of termination for correlation with logs and metrics.
+Observe Load Balancer Behavior
+
+Check if the load balancer or load generator flags the server as unhealthy.
+Monitor if traffic is rerouted to other healthy nodes.
+5.3 Monitoring and Observation
+Application Latency
+
+Monitor p95 and p99 latency in real time.
+Check for any sudden increase in latency as traffic shifts away from or tries to hit the impacted server.
+Error Rate
+
+Look for HTTP 5xx or connection errors that may occur if the server is flagged unhealthy incorrectly or if traffic attempts to reach it.
+Server/Process Metrics
+
+Verify CPU and memory usage remain stable.
+Ensure that only the health check process is down (the core application processes should remain unaffected).
+Cluster/Load Balancer Impact
+
+Observe how quickly the load balancer updates the health status of the impacted server.
+Evaluate whether the overall system experiences performance or availability degradation.
+5.4 Sustaining and Scaling the Failure
+Maintain Process Down
+
+Keep the health check process terminated for a planned duration (5–10 minutes or more).
+Confirm if other nodes handle the extra load gracefully.
+Repeated Termination (Optional)
+
+If desired, kill the health check process on multiple nodes to see how the system behaves under multiple “unhealthy” indicators.
+5.5 Recovery
+Restart the Health Check Process
+
+Use the appropriate command to bring the process back online (e.g., systemctl start health_check_service or running the appropriate script).
+Observe Recovery
+
+Validate that the load balancer recognizes the server as healthy again.
+Monitor how quickly traffic returns to the node and if latency/error rates return to baseline.
+6. Success Criteria
+Hypothesis Confirmed if:
+
+The load balancer or load generator correctly identifies the server as unhealthy once the process is killed.
+Traffic is rerouted without significant service interruption (latency and error rates remain within acceptable thresholds).
+Upon restarting the health check process, the server is flagged healthy again, and traffic resumes normally.
+Hypothesis Refuted if:
+
+Latency spikes significantly or error rates rise beyond acceptable thresholds.
+The system or other servers experience downtime due to misconfiguration or inability to detect the process failure.
+Recovery does not restore the server to a healthy state in a timely manner (e.g., the node remains offline or partially disconnected).
+7. Result Analysis and Conclusions
+Compare Against Baseline
+
+Determine how latency and availability changed compared to initial measurements.
+Error Spikes
+
+Identify if 5xx or timeouts occurred right after the health check process was terminated.
+Monitoring Observations
+
+Evaluate how effectively alerts and dashboards reported the health check process failure.
+Check if logs or metrics clearly indicated the process was killed.
+Improvement Actions
+
+Refine health check intervals or thresholds if the failover process was too slow or too quick (leading to false positives).
+Implement additional safety checks, such as direct application-level pings, in case the health check service goes down.
+8. Recommendations
+Automate
+
+Integrate this experiment into a CI/CD pipeline using chaos engineering frameworks (e.g., Gremlin, Litmus) or custom scripts.
+Gradual Scenarios
+
+Vary how long the health check process remains down, or kill it on multiple servers in sequence.
+Frequency
+
+Conduct these tests periodically or after major infrastructure or load balancer configuration changes.
+Expand Coverage
+
+Combine this experiment with other chaos scenarios (e.g., CPU/memory stress, network disruptions) to test resilience under compound failures.
