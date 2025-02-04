@@ -1,0 +1,121 @@
+1. High Java Memory Usage
+1.1 Title
+System Resilience Validation under Sudden High JVM Memory Usage
+
+1.2 Description
+This experiment aims to assess how the system behaves when a Java-based service or application experiences artificially high heap or off-heap memory consumption. By generating memory-intensive operations in the JVM, we aim to verify whether the system can maintain acceptable performance and availability levels.
+
+2. Objectives
+Measure performance degradation (latency, error rate) when a Java service or application experiences high memory usage (heap or off-heap).
+Observe JVM behavior regarding garbage collection (GC) pauses or out-of-memory (OOM) conditions under stress.
+Evaluate the effectiveness of monitoring and alerting (e.g., heap usage, GC logs, memory usage alerts).
+Identify configuration or architectural improvements (e.g., heap size tuning, GC tuning, container memory limits) to mitigate the impact of memory saturation.
+3. Scope
+Critical Java-based services or microservices that could face JVM memory constraints.
+Load balancers or orchestration mechanisms (e.g., Kubernetes, autoscaling) that manage Java application containers or pods.
+Staging or pre-production environment reflecting production capacity and Java memory configurations (heap size, GC settings, etc.).
+Assumptions include:
+
+Access to Java performance monitoring tools (e.g., JMX metrics, GC logs, APM solutions).
+Availability of a load testing tool (e.g., JMeter, Gatling) to generate application traffic.
+A memory stress approach within the JVM (e.g., specialized Java libraries or test code that allocates large objects).
+4. Hypothesis
+“If the Java heap usage reaches a critical level (e.g., 80–90% of the maximum heap size) on a key service, the overall system will still operate within established latency and availability SLAs, and avoid massive OOM errors or prolonged GC pauses.”
+
+5. Chaos Experiment Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+
+Use a performance test (e.g., JMeter, Gatling) at a moderate load (e.g., 100 TPS or 50% of peak) against the Java application.
+Initial Measurement
+
+Run this load for about 10 minutes to establish baseline metrics: p95/p99 latency, error rate, normal heap usage, and GC activity under standard conditions.
+5.2 Java Memory Stress Injection
+Select the Target Service
+
+Identify a Java-based service or microservice deemed critical.
+Ensure you have permission and non-production safeguards in place.
+Inject Memory Stress
+
+Use one of the following approaches:
+Memory Leak Simulation: Introduce code that continually allocates objects without releasing them.
+Stress Libraries: Libraries like [ByteBuddy-based] testers or specialized scripts that generate large amounts of data in memory.
+GC Stress Options: Tools or JVM flags that artificially reduce available heap space.
+Run this stress for 5–10 minutes (or more) to push the heap toward 80–90% usage.
+Record Exact Time
+
+Note the start time of the stress to correlate logs and metrics (GC logs, JMX metrics) before, during, and after the event.
+5.3 Monitoring and Observation
+Application Latency
+
+Monitor p95 and p99 latency in real time.
+Check if latency remains within SLA thresholds (e.g., p95 < 500 ms).
+Error Rate
+
+Observe HTTP 5xx errors or timeouts.
+Compare these values against baseline.
+JVM Metrics
+
+Track heap usage, GC frequency and duration (e.g., from JMX or APM).
+Watch for Full GC events and their impact on response times.
+Server/Container Resources
+
+In containerized environments, monitor cgroup memory usage.
+Check if the process triggers OOM killer events.
+Cluster Impact
+
+Verify if traffic is rerouted to other healthy instances when GC pauses become frequent or memory usage spikes.
+Evaluate overall system performance and stability.
+5.4 Sustaining and Scaling the Failure
+Maintain Saturation
+
+Let the memory stress process run for the planned duration to observe how the JVM handles prolonged high memory usage.
+Gradual Increase (Optional)
+
+Increase the allocation rate or object size in the stress code/library to test more extreme scenarios.
+5.5 Recovery
+Stop Memory Stress Injection
+
+Terminate or remove the memory-intensive code/library.
+Observe Recovery
+
+Check if latency and error rate return to baseline.
+Monitor if GC cycles normalize and if heap usage stabilizes at pre-experiment levels.
+6. Success Criteria
+Hypothesis Confirmed if:
+
+Latency stays within acceptable thresholds (e.g., p95 < 500 ms).
+Error rate remains below the defined threshold (e.g., <1%).
+No major GC-induced slowdowns, OOM errors, or application restarts occur.
+Hypothesis Refuted if:
+
+Response times severely degrade (e.g., p95 > 2–3x baseline).
+Error rate spikes above acceptable levels (e.g., >5%).
+The JVM crashes, experiences repeated Full GCs, or triggers OOM (OutOfMemoryError).
+7. Result Analysis and Conclusions
+Compare Against Baseline
+
+Determine changes in latency, availability, and GC times compared to the original measurements.
+Error Spikes
+
+Identify if 5xx or timeouts occurred during high heap usage, or if OutOfMemoryErrors were thrown.
+Monitoring Observations
+
+Evaluate the effectiveness of alerts, dashboards, and logging for memory usage and GC events.
+Improvement Actions
+
+Consider changes to heap size, GC algorithms (e.g., G1, ZGC), or container memory limits.
+Implement memory leak detection or robust memory usage patterns.
+8. Recommendations
+Automate
+
+Integrate this Java memory Chaos Experiment into a CI/CD pipeline using tools like Gremlin or Litmus, or custom scripts that trigger memory allocations.
+Gradual Scenarios
+
+Test varying levels of heap pressure (50%, 70%, 90%, near 100%) to observe how different memory thresholds affect performance.
+Frequency
+
+Run these experiments regularly or after significant changes to the Java application, JVM parameters, or underlying infrastructure.
+Expand Coverage
+
+Combine Java memory stress with other chaos scenarios (e.g., CPU spikes, network latency) for more comprehensive resilience testing.
