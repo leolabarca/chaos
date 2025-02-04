@@ -1,0 +1,117 @@
+1. High Bandwidth Usage
+1.1 Title
+System Resilience Validation under Sudden High Network Bandwidth Usage
+
+1.2 Description
+The primary goal of this experiment is to observe how the system behaves when one (or several) of its critical servers experience artificially high network bandwidth consumption. By inducing large volumes of inbound or outbound traffic, we aim to verify whether the system maintains acceptable latency, availability, and throughput levels under extreme network load.
+
+2. Objectives
+Measure performance degradation (latency, error rate) when network bandwidth is heavily utilized.
+Validate the system’s ability to handle or reroute traffic if one node becomes network-saturated.
+Evaluate the effectiveness of monitoring and alerting for network-related metrics (e.g., bandwidth usage, packet loss, throughput).
+Identify configuration or architectural improvements (e.g., load balancing, network QoS, autoscaling) to mitigate the impact of bandwidth saturation.
+3. Scope
+Critical application services that depend on network throughput or have large data transfer requirements.
+Load balancers or orchestration mechanisms (Kubernetes, autoscaling) that might redirect network traffic if a node becomes saturated.
+Staging or pre-production environment that closely mirrors production networking setups (bandwidth limits, routing, etc.).
+Assumptions include:
+
+Availability of tools or methods to induce high network utilization (e.g., iperf, stress-ng --sock, custom scripts generating large amounts of network traffic).
+Monitoring solutions capable of tracking bandwidth usage, packet loss, and latency (e.g., netstat, specialized dashboards, network sniffers).
+A load testing tool (e.g., JMeter, Gatling) to produce normal application traffic.
+4. Hypothesis
+“If a critical server’s network bandwidth usage spikes to near maximum capacity (e.g., 80–100% of available bandwidth), the overall system will continue operating within established SLA thresholds for latency and availability, avoiding significant timeouts or connection failures.”
+
+5. Chaos Experiment Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+
+Launch a performance test (e.g., JMeter, Gatling) at a moderate load (e.g., 100 TPS or 50% of expected peak).
+Initial Measurement
+
+Maintain this load for about 10 minutes to establish baseline metrics: p95/p99 latency, error rate, normal network usage, and throughput under standard conditions.
+5.2 Network Bandwidth Stress Injection
+Select the Target Server
+
+Identify a critical or representative node in the cluster that handles significant network communication.
+Inject High Bandwidth Usage
+
+Use a tool like iperf (e.g., iperf3 -c <server> -u -b <target_rate>) or stress-ng --sock to generate high volumes of network traffic.
+Aim to push the network interface to ~80–100% utilization for 5–10 minutes or more, depending on experiment goals.
+Record Exact Time
+
+Note the start time of network saturation to correlate metrics (latency, error rates, bandwidth usage) before, during, and after the event.
+5.3 Monitoring and Observation
+Application Latency
+
+Track p95 and p99 latency in real time.
+Check if latencies remain within SLA thresholds (e.g., p95 < 500 ms).
+Error Rate
+
+Monitor increases in HTTP 5xx errors, timeouts, or connection resets.
+Compare these values against the baseline.
+Network Metrics
+
+Observe bandwidth usage, packet loss, retransmissions, and overall throughput.
+Look for signs of congestion or buffering, such as high RTT (round-trip time).
+Server/Container Resources
+
+Check CPU usage and memory usage on the node under stress, as high network load can also increase CPU overhead.
+If containerized, monitor cgroup or Kubernetes network limits.
+Cluster Impact
+
+See if the load balancer redirects traffic to other nodes when bandwidth is saturated.
+Evaluate overall system performance and stability during the stress period.
+5.4 Sustaining and Scaling the Failure
+Maintain Saturation
+
+Continue generating high network traffic for the planned duration to observe prolonged effects.
+Gradual Increase (Optional)
+
+Increase the traffic rate or number of concurrent connections (streams) to test more extreme scenarios.
+5.5 Recovery
+Stop Network Bandwidth Stress Injection
+
+Terminate the high-traffic generation process (e.g., stop iperf).
+Observe Recovery
+
+Check if latency, error rate, and throughput return to baseline levels.
+Determine if the system requires additional time to fully recover (clearing connections, resetting buffers, etc.).
+6. Success Criteria
+Hypothesis Confirmed if:
+
+Latency remains within acceptable thresholds (e.g., p95 < 500 ms).
+Error rate stays below the defined threshold (e.g., <1%).
+The system remains responsive, avoiding significant packet loss or timeouts.
+Hypothesis Refuted if:
+
+Response times significantly increase (e.g., p95 > 2–3x baseline).
+The error rate surges above acceptable levels (e.g., >5%).
+The system experiences critical network failures, crashes, or becomes unreachable.
+7. Result Analysis and Conclusions
+Compare Against Baseline
+
+Analyze changes in latency, error rates, and network throughput relative to initial measurements.
+Error Spikes
+
+Identify any correlation between packet loss, high retransmissions, and elevated HTTP error rates.
+Monitoring Observations
+
+Review the effectiveness of network performance dashboards, alerting rules, and logging.
+Improvement Actions
+
+Optimize network configurations (e.g., TCP window sizes, QoS rules, load balancer settings).
+Consider scaling or routing policies to handle high bandwidth scenarios more effectively.
+8. Recommendations
+Automate
+
+Integrate this network bandwidth Chaos Experiment into a CI/CD pipeline using tools like Gremlin or custom scripts.
+Gradual Scenarios
+
+Test various rates of bandwidth stress (50%, 70%, 100% utilization) with different packet sizes or protocols (TCP vs. UDP).
+Frequency
+
+Conduct these tests regularly or after major network infrastructure changes (new firewall rules, load balancer upgrades, etc.).
+Expand Coverage
+
+Combine high bandwidth usage with other chaos tests (e.g., CPU stress, memory stress, disk I/O) to assess overall system resilience.
