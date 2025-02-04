@@ -1,0 +1,118 @@
+1. High I/O Usage
+1.1 Title
+System Resilience Validation under Sudden High Disk I/O Usage
+
+1.2 Description
+The primary goal of this experiment is to assess the system’s behavior when one (or several) of its critical servers undergo artificially high disk I/O utilization. By inducing heavy read/write operations on the storage (HDD/SSD), we aim to verify whether the rest of the application continues to operate within acceptable performance and availability thresholds.
+
+2. Objectives
+Measure performance degradation (latency, error rate) when a server experiences high disk I/O usage.
+Validate the system’s ability to maintain throughput and responsiveness under read/write saturation.
+Evaluate monitoring and alerting effectiveness regarding disk I/O metrics (e.g., disk queues, latency, throughput).
+Identify configuration or architectural improvements to handle or mitigate the impact of I/O saturation (e.g., caching strategies, SSD vs. HDD usage).
+3. Scope
+Critical application servers or services using local or attached storage (e.g., HDD, SSD, network-attached storage).
+Load balancers or orchestration mechanisms (Kubernetes, autoscaling) that may redistribute traffic if a node’s disk I/O is saturated.
+Staging or pre-production environment closely resembling production, including disk types and configurations.
+Assumptions include:
+
+Availability of tools for disk I/O stress (e.g., fio, dd, stress-ng --hdd).
+Monitoring solutions capable of tracking disk-related metrics (I/O throughput, I/O wait, disk queue length, etc.).
+A load testing tool (e.g., JMeter, Gatling) to generate normal traffic to the application.
+4. Hypothesis
+“If a critical server’s disk I/O reaches near-saturation (e.g., 80–100% I/O utilization), the overall system will still meet latency and availability SLAs and avoid widespread timeouts or failures.”
+
+5. Chaos Experiment Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+
+Use a performance test (JMeter, Gatling) at a moderate load (e.g., 100 TPS or 50% of expected peak) against the application.
+Initial Measurement
+
+Run this traffic for about 10 minutes to establish baseline metrics: p95/p99 latency, error rate, normal disk usage, and I/O wait times under standard conditions.
+5.2 Disk I/O Stress Injection
+Select the Target Server
+
+Choose a “critical” or representative node within the cluster that handles disk-intensive operations.
+Inject I/O Stress
+
+Use a tool like fio or stress-ng (e.g., stress-ng --hdd 1 --timeout 300) to generate large amounts of disk read/write operations.
+Run the stress for 5–10 minutes (or more) to push I/O utilization to ~80–100%.
+Record Exact Time
+
+Note the start time of disk I/O stress to correlate metrics (latency, error rate, disk queue length) before, during, and after the event.
+5.3 Monitoring and Observation
+Application Latency
+
+Track p95 and p99 latency in real time.
+Check if latencies remain within SLA thresholds (e.g., p95 < 500 ms).
+Error Rate
+
+Observe any increases in HTTP 5xx errors or timeouts.
+Compare with baseline error rates.
+Disk I/O Metrics
+
+Monitor read/write throughput (MB/s), I/O wait time, queue length, and overall disk utilization.
+Look for any spikes in I/O wait that could impact application performance.
+Server/Container Resources
+
+Watch CPU usage, memory usage, and especially I/O wait (iowait) percentage.
+If the environment is virtualized or containerized, confirm disk limits or cgroup constraints.
+Cluster Impact
+
+Check if the load balancer or orchestration system reroutes requests away from the saturated node.
+Observe overall system health, ensuring no cascading failures occur.
+5.4 Sustaining and Scaling the Failure
+Maintain Saturation
+
+Let the disk I/O stress tool run for the planned duration to observe prolonged effects on the system.
+Gradual Increase (Optional)
+
+Increase the number of threads or the size of read/write operations to explore more extreme I/O conditions.
+5.5 Recovery
+Stop Disk I/O Stress Injection
+
+Terminate the disk stress process (e.g., stop the fio or stress-ng job).
+Observe Recovery
+
+Check if latency and error rate return to normal.
+Monitor whether disk queues clear promptly and any background tasks (e.g., replication, logs) catch up.
+6. Success Criteria
+Hypothesis Confirmed if:
+
+Latency remains within acceptable thresholds (e.g., p95 < 500 ms).
+Error rate stays below the defined threshold (e.g., <1%).
+No significant service degradation (e.g., the application remains responsive without major timeouts or queue backups).
+Hypothesis Refuted if:
+
+Response times significantly increase (e.g., p95 > 2–3x baseline).
+The error rate surges above acceptable levels (e.g., >5%).
+The system experiences critical bottlenecks or fails to serve requests (e.g., service crashes).
+7. Result Analysis and Conclusions
+Compare Against Baseline
+
+Evaluate how latency, availability, and throughput changed vs. initial measurements.
+Error Spikes
+
+Identify if there were spikes in 5xx errors or timeouts directly correlated with high disk I/O.
+Monitoring Observations
+
+Assess the effectiveness of alerting and dashboards in detecting and reporting disk saturation.
+Determine if logs or metrics provided clear insights into the issue.
+Improvement Actions
+
+Consider implementing caching, SSD storage, or optimized I/O patterns.
+Adjust autoscaling or scheduling policies to handle I/O-bound workloads more effectively.
+8. Recommendations
+Automate
+
+Integrate this disk I/O Chaos Experiment into a CI/CD pipeline, potentially using tools like Gremlin or custom scripts that run fio or stress-ng.
+Gradual Scenarios
+
+Test different I/O loads (e.g., random read/write, sequential read/write) and vary the volume (50%, 70%, 100% utilization).
+Frequency
+
+Conduct these tests regularly or whenever significant changes occur in storage hardware, OS-level file system settings, or container orchestrations.
+Expand Coverage
+
+Combine high disk I/O with other chaos events (e.g., CPU spikes, memory stress, network latency) for a more comprehensive resilience assessment.
