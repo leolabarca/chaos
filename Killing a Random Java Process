@@ -1,0 +1,115 @@
+1. Killing a Random Java Process
+1.1 Title
+System Resilience Validation by Terminating a Random Java Process
+
+1.2 Description
+The goal of this experiment is to evaluate the system’s behavior when an essential Java process is abruptly terminated. By randomly choosing a process to kill, we aim to see if other components can handle the sudden absence of that process, maintain performance, and recover gracefully once it is restarted.
+
+2. Objectives
+Measure the impact on availability and performance when a Java process is unexpectedly killed.
+Validate any failover or handling mechanisms if the process is part of a broader system (e.g., a multi-process application or environment).
+Evaluate the effectiveness of monitoring and alerting in detecting that the Java process is no longer running.
+Identify improvements (e.g., retry logic, graceful degradation, autoscaling) to mitigate the impact of losing a key Java process.
+3. Scope
+Any critical or relevant Java process running in a test or staging environment.
+Potential orchestration or scheduling tools (if applicable) that might restart or replace the process automatically.
+Staging or pre-production environment that closely mirrors production in terms of Java runtime configurations (JVM versions, memory settings).
+Assumptions include:
+
+A known Java process name or identifier that can be safely terminated (e.g., java -jar <application>.jar).
+Monitoring and alerting systems (APM, logs, dashboards) are in place to detect the absence of the process.
+The ability to restart the process quickly (manually or automatically) to minimize any sustained disruption.
+4. Hypothesis
+“If a random Java process is killed unexpectedly, the rest of the system will continue operating within established SLA thresholds for latency and availability, while any dependent components gracefully handle the absence of that process.”
+
+5. Chaos Experiment Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+
+Use a performance test tool (e.g., JMeter, Gatling) to drive moderate or expected load (e.g., 50–100 TPS) against the system or relevant endpoints.
+Initial Measurement
+
+Run the traffic for about 10 minutes to capture baseline metrics: p95/p99 latency, error rate, and normal operational behavior under usual conditions.
+5.2 Killing the Java Process
+Select the Target Process
+
+Identify which Java process to terminate—preferably at random or based on which process is deemed critical.
+Terminate the Process
+
+Use a command like kill -9 <pid> (Linux) or a suitable tool/script to abruptly stop the Java process.
+Record the timestamp of termination for correlation with system metrics and logs.
+Observe Immediate Effects
+
+Check how the system handles requests related to the terminated process.
+Note if any errors, timeouts, or performance degradation occur.
+5.3 Monitoring and Observation
+Application Latency
+
+Monitor p95 and p99 latency for the entire system.
+Check if latencies remain within SLA thresholds (e.g., p95 < 500 ms).
+Error Rate
+
+Look for increases in HTTP 5xx errors or timeouts, especially if this Java process handled critical functionality.
+Compare values to the baseline to detect significant spikes.
+Resource Metrics
+
+Verify CPU, memory, and network usage on remaining processes or services, ensuring no cascading failures.
+If containerized or orchestrated, check how the environment responds to the missing process.
+System-Wide Impact
+
+Observe whether other processes or components are affected (e.g., queue buildup, dependency timeouts).
+Evaluate overall system health during the outage.
+5.4 Sustaining and Scaling the Failure
+Maintain Process Down
+
+Keep the Java process offline for a planned duration (5–10 minutes or more) to assess how the rest of the system copes with its absence.
+Multiple Processes (Optional)
+
+If desired, terminate additional Java processes (one at a time or simultaneously) to test the system under more widespread failures.
+5.5 Recovery
+Restart the Java Process
+
+Use the appropriate command or mechanism (e.g., java -jar <application>.jar, or a redeployment script) to bring the process back online.
+Observe Recovery
+
+Monitor how quickly the system recognizes the process is back and resumes normal operation.
+Check if latency and error rates return to baseline levels.
+6. Success Criteria
+Hypothesis Confirmed if:
+
+The system maintains acceptable latency (e.g., p95 < 500 ms) and low error rates (e.g., <1%) while the Java process is down.
+Dependent components handle the missing process gracefully (e.g., retries, fallback logic, no major disruptions).
+Upon restart, the process seamlessly rejoins the system, and overall performance returns to baseline.
+Hypothesis Refuted if:
+
+Latency or error rates spike beyond acceptable thresholds (e.g., >5% error rate).
+The system experiences significant downtime or widespread failures due to the missing process.
+The process fails to rejoin properly, or recovery is delayed, exposing issues with orchestration or system design.
+7. Result Analysis and Conclusions
+Compare Against Baseline
+
+Determine how latency, availability, and throughput changed relative to initial measurements.
+Error Spikes
+
+Examine whether requests failed immediately or if fallback mechanisms buffered the impact.
+Monitoring Observations
+
+Evaluate how effectively dashboards, alerts, and logs reported the missing Java process.
+Check if the logs clearly indicate the moment of termination and subsequent errors.
+Improvement Actions
+
+Enhance system resilience measures (e.g., circuit breakers, retry policies, autoscaling rules).
+Review any automation scripts or processes that restart the Java application to ensure fast recovery.
+8. Recommendations
+Automate
+
+Integrate this “kill a random Java process” test into a CI/CD pipeline using chaos engineering frameworks (Gremlin, Litmus) or custom scripts.
+Gradual Scenarios
+
+Change the duration of the outage or increase system load while the process is down to test the system’s resilience under varying conditions.
+Frequency
+
+Run these experiments periodically or after significant changes to Java configurations, code updates, or infrastructure adjustments.
+Expand Coverage
+
+Combine this experiment with other failure scenarios (CPU overload, network disruptions, memory stress) to validate resilience under compound conditions.
