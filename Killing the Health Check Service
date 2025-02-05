@@ -1,0 +1,118 @@
+1. Killing the Health Check Service
+1.1 Title
+System Resilience Validation by Terminating the Health Check Service
+
+1.2 Description
+This experiment aims to observe how the system behaves when the Health Check Service—responsible for informing whether the primary CX application server instance is operational—suddenly stops functioning. By terminating this service, we want to see if the load balancer correctly identifies the instance as “unavailable” and routes all traffic to the backup (COB) instance, ensuring continuity and performance.
+
+2. Objectives
+Measure the impact on availability when the Health Check Service is terminated unexpectedly on the primary CX application server instance.
+Validate the load balancer’s response to the lack of health check signals (e.g., ensuring traffic is promptly rerouted to the standby COB instance).
+Evaluate the effectiveness of monitoring and alerting for detecting failures of the Health Check Service.
+Identify improvements (e.g., fallback methods, advanced health checks) to maintain robust failover in case of health check service outages.
+3. Scope
+Primary CX application server instances that rely on the Health Check Service for uptime reporting.
+Load balancers configured to send traffic to the primary instance if healthy, and to a backup/COB instance if the primary is reported as unhealthy.
+Staging or pre-production environments closely mirroring production, with identical Health Check Service configurations, intervals, and thresholds.
+Assumptions include:
+
+The Health Check Service runs as a distinct, identifiable process or service that can be safely stopped and restarted.
+Monitoring tools are in place to track service status, as well as to observe load balancer decisions.
+The backup (COB) instance is fully operational and capable of handling 100% of the traffic if the primary instance is marked unhealthy.
+4. Hypothesis
+“If the Health Check Service on the primary CX server instance is killed, the load balancer will detect the instance as unhealthy and shift all traffic to the backup (COB) instance without causing significant downtime or performance degradation.”
+
+5. Chaos Experiment Design
+5.1 Load Configuration (Baseline)
+Generate Traffic
+
+Use a performance test tool (e.g., JMeter, Gatling) to produce a moderate load (e.g., 50–100 TPS) against the CX application.
+Initial Measurement
+
+Run traffic for about 10 minutes to establish baseline metrics: p95/p99 latency, error rate, and normal Health Check Service behavior (primary instance reported as healthy).
+5.2 Terminating the Health Check Service
+Select the Primary CX Instance
+
+Identify the running Health Check Service on the main (primary) CX application server.
+Kill the Health Check Service
+
+Use a command or script (e.g., systemctl stop health-check.service or kill -9 <pid>) to abruptly stop the service.
+Record the exact timestamp to correlate with load balancer logs and metrics.
+Observe Load Balancer Behavior
+
+Check how quickly the load balancer identifies the primary CX server as “unhealthy.”
+Confirm that traffic is redirected to the standby (COB) instance.
+5.3 Monitoring and Observation
+Application Latency
+
+Track p95 and p99 latency in real time.
+Note if any latency spikes occur during the transition to the COB instance.
+Error Rate
+
+Watch for HTTP 5xx errors or timeouts if traffic is partially routed to the primary instance before it’s marked unhealthy.
+Compare with baseline metrics.
+Server/Service Metrics
+
+Validate that only the Health Check Service is down while the main CX application processes remain up.
+Monitor the COB instance for resource usage, ensuring it can handle the full load.
+Load Balancer Impact
+
+Evaluate how quickly the load balancer re-routes traffic.
+Verify if the system remains stable and within acceptable performance thresholds once all traffic is on the COB instance.
+5.4 Sustaining and Scaling the Failure
+Keep the Health Check Service Down
+
+Maintain the service’s offline status for a planned duration (5–10 minutes or more).
+Ensure the COB instance operates without issues while handling 100% of the traffic.
+Multiple Instances (Optional)
+
+If multiple CX servers exist, repeat the health check service termination on different servers to see if the load balancer handles each scenario effectively.
+5.5 Recovery
+Restart the Health Check Service
+
+Use the appropriate command or script (e.g., systemctl start health-check.service) to bring the service back online.
+Observe Recovery
+
+Verify that the load balancer detects the primary instance as healthy again.
+Confirm that traffic is (optionally) rebalanced between the primary and COB instance if configured for active-active operations, or remains on the primary if it’s an active-passive setup.
+6. Success Criteria
+Hypothesis Confirmed if:
+
+The load balancer quickly marks the primary instance unhealthy and shifts traffic to the COB instance.
+Latency and error rate remain within acceptable thresholds (e.g., p95 < 500 ms, error rate <1%) during the failover.
+Upon restarting the Health Check Service, the primary instance is recognized as healthy without causing further disruptions.
+Hypothesis Refuted if:
+
+Failover is delayed or does not occur, causing significant downtime or elevated errors.
+Latency or error rate surges beyond acceptable limits (e.g., error rate >5%).
+The primary instance fails to rejoin properly, resulting in ongoing issues even after the Health Check Service is restarted.
+7. Result Analysis and Conclusions
+Compare Against Baseline
+
+Assess any performance changes in latency, throughput, or error rate before and after the health check service termination.
+Failover Accuracy
+
+Confirm the load balancer recognized the lack of health check signals and routed traffic accordingly.
+Determine if failover happened within the expected time window.
+Monitoring Observations
+
+Evaluate alerting and dashboards for how they reported the offline health check service.
+Check logs for clear indications of the exact moment the service was killed and recognized as unhealthy.
+Improvement Actions
+
+Adjust health check intervals or thresholds if the system took too long (or was too quick) to mark the instance unhealthy.
+Refine COB instance capacity to ensure it can handle sustained 100% load.
+8. Recommendations
+Automate
+
+Integrate this experiment into a CI/CD pipeline or use chaos engineering tools (Gremlin, Litmus) to simulate health check service failures regularly.
+Gradual Scenarios
+
+Test different health check intervals (short vs. long) to see how quickly failover occurs.
+Consider partial load increments to the COB instance.
+Frequency
+
+Conduct these tests periodically or after major load balancer configuration changes, ensuring failover readiness is consistently validated.
+Expand Coverage
+
+Combine health check service terminations with other chaos scenarios (e.g., CPU spikes, memory stress, network disruptions) for deeper resilience testing.
