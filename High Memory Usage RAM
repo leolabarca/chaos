@@ -1,8 +1,8 @@
 1. High Memory Usage RAM
-1.1 Title
+Title
 System Resilience Validation under Sudden High Memory Usage
 
-1.2 Description
+Description
 The goal of this experiment is to evaluate how the system behaves when one (or several) of its critical servers undergo artificially high memory consumption. By inducing memory spikes, we aim to verify whether the rest of the application maintains acceptable availability and performance levels.
 
 2. Objectives
@@ -22,14 +22,14 @@ Access to a load testing tool (e.g., JMeter, Gatling) and a memory stress tool (
 “If there is a memory consumption spike reaching critical levels (e.g., 80–100% of available RAM) on a critical server, the overall system will continue to operate within the established latency and availability SLAs, without massive errors or outages.”
 
 5. Chaos Experiment Design
-5.1 Load Configuration (Baseline)
+Load Configuration (Baseline)
 Generate Traffic
 
 Launch a performance test with the expected transaction volume (e.g., 100 TPS or 50% of peak load).
 Initial Measurement
 
 Run this load for about 10 minutes to establish baseline metrics (p95/p99 latency, error rate, and normal memory usage).
-5.2 Memory Stress Injection
+Memory Stress Injection
 Select the Target Server
 
 Choose a “critical” or representative server in the cluster.
@@ -39,7 +39,7 @@ Use a tool (e.g., stress-ng --vm 1 --vm-bytes 80% --timeout 300) to push memory 
 Record Exact Time
 
 Note the start time of the stress to correlate metrics before, during, and after the event.
-5.3 Monitoring and Observation
+Monitoring and Observation
 Application Latency
 
 Monitor p95 and p99 latency in real time.
@@ -55,14 +55,14 @@ Cluster Impact
 
 Check whether the load balancer redistributes traffic to other nodes.
 Evaluate overall system performance during the memory stress period.
-5.4 Sustaining and Scaling the Failure
+Sustaining and Scaling the Failure
 Maintain Saturation
 
 Let the memory stress tool run for the planned duration to observe system stability under high memory pressure.
 Gradual Increase (Optional)
 
 If needed, increase the number of memory stress processes or the allocated memory size to test more extreme scenarios.
-5.5 Recovery
+Recovery
 Stop Memory Stress Injection
 
 Terminate the memory stress process.
