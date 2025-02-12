@@ -1,0 +1,70 @@
+En JMeter
+En Apache JMeter, puedes pasar el argumento -Djdk.tls.keyLimits=disable de dos maneras:
+
+✅ Opción 1: Modificar jmeter.bat o jmeter.sh
+Ubica el archivo de inicio de JMeter:
+
+En Windows: apache-jmeter/bin/jmeter.bat
+En Linux/macOS: apache-jmeter/bin/jmeter.sh
+Edita el archivo y busca la línea donde se definen los argumentos de la JVM (set JVM_ARGS).
+
+Agrega la opción -Djdk.tls.keyLimits=disable en la variable JVM_ARGS:
+
+sh
+Copiar
+Editar
+set JVM_ARGS=-Djdk.tls.keyLimits=disable
+O en Linux/macOS:
+
+sh
+Copiar
+Editar
+export JVM_ARGS="-Djdk.tls.keyLimits=disable"
+Guarda los cambios y reinicia JMeter.
+
+✅ Opción 2: Pasar el argumento en la línea de comandos
+También puedes iniciar JMeter con el argumento manualmente en la terminal:
+
+sh
+Copiar
+Editar
+jmeter -Djdk.tls.keyLimits=disable
+🔹 Esta opción es útil si no quieres modificar archivos de configuración.
+
+🔹 En IntelliJ IDEA
+Para configurar IntelliJ IDEA y agregar -Djdk.tls.keyLimits=disable, sigue estos pasos:
+
+✅ Opción 1: Modificar las configuraciones de ejecución
+Abre IntelliJ IDEA y carga tu proyecto.
+Ve a Run > Edit Configurations.
+En la sección VM options, agrega:
+ini
+Copiar
+Editar
+-Djdk.tls.keyLimits=disable
+Guarda los cambios y ejecuta tu aplicación.
+✅ Opción 2: Modificar el archivo de opciones de JVM
+Si quieres que este ajuste se aplique en todas las ejecuciones de IntelliJ:
+
+Ubica la carpeta de instalación de IntelliJ.
+
+En Windows:
+makefile
+Copiar
+Editar
+C:\Program Files\JetBrains\IntelliJ IDEA <version>\bin\
+En macOS/Linux:
+swift
+Copiar
+Editar
+/Applications/IntelliJ IDEA.app/Contents/bin/
+Abre el archivo idea64.exe.vmoptions (Windows) o idea.vmoptions (Linux/macOS).
+
+Agrega la siguiente línea al final del archivo:
+
+ini
+Copiar
+Editar
+-Djdk.tls.keyLimits=disable
+Guarda los cambios y reinicia IntelliJ.
+
