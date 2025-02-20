@@ -1,3 +1,18 @@
+import os
+import shutil
+
+source_folder = r"C:\ruta\de\las\carpetas"
+destination_folder = r"C:\ruta\destino"
+
+for root, dirs, files in os.walk(source_folder):
+    for file in files:
+        if file.endswith(".txt"):
+            source_file = os.path.join(root, file)
+            destination_file = os.path.join(destination_folder, file)
+            shutil.copy2(source_file, destination_file)
+
+
+
 En JMeter
 En Apache JMeter, puedes pasar el argumento -Djdk.tls.keyLimits=disable de dos maneras:
 
