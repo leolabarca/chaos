@@ -1,40 +1,57 @@
-Ejemplos Hipotesis Caos
+Hipótesis para CPU (Carga y Consumo en Java)
+Hipótesis:
+Si la carga de CPU en los servidores de aplicación alcanza o supera el 90 % durante un periodo sostenido de 5 minutos,
+entonces la aplicación debería continuar procesando las solicitudes sin interrupciones, sin provocar una degradación abrupta en la tasa de transacciones por segundo (TPS),
+porque la infraestructura debe contar con una correcta gestión de subprocesos (threads), mecanismos de escalado horizontal/vertical y estrategias de optimización del procesamiento de tareas.
 
-Hipótesis de prueba de caos en CPU
-Si la carga de CPU en los servidores de aplicación aumenta al 90 % durante un periodo de 5 minutos,
-entonces el sistema debería continuar procesando solicitudes sin una degradación significativa en el rendimiento,
-porque el sistema cuenta con mecanismos de escalado automático y gestión eficiente de recursos.
-
-Métricas de validación:
-Tiempo de respuesta: No debe aumentar más del 50 % respecto al tiempo de respuesta promedio en condiciones normales.
-TPS (Transacciones por Segundo): No debe reducirse en más del 20 % durante el experimento.
-Errores: La tasa de errores (5xx) no debe superar el 2 %.
-Recuperación: Una vez finalizada la sobrecarga, el sistema debe volver a su estado normal en menos de 3 minutos.
+Criterios de validación:
+Impacto en el rendimiento:
+La aplicación no debe experimentar una reducción en las TPS mayor al 20 %.
+El tiempo de respuesta medio no debe aumentar más del 50 %.
+Uso de CPU por thread:
+No debe haber hilos en estado bloqueado (BLOCKED o WAITING) durante largos periodos, lo que indicaría problemas de concurrencia.
+Los hilos deben distribuirse equitativamente en los cores disponibles sin provocar monopolización de recursos.
+Tasa de errores:
+No debe haber un aumento de errores 5xx (timeouts, fallos de procesamiento).
+Recuperación:
+Una vez finalizada la carga, la aplicación debe volver a niveles normales de rendimiento en menos de 3 minutos.
 
 
 
 ---------------------------------------------------------------------------------------------------------------------------
 
 Hipótesis para Java Memory (Heap & Garbage Collection)
-Si el consumo de memoria heap en la JVM alcanza el 85 % de su capacidad máxima durante 10 minutos,
-entonces la aplicación debería seguir funcionando sin interrupciones ni degradaciones significativas en el rendimiento,
-porque el Garbage Collector (GC) debería gestionar la memoria eficientemente sin causar pausas prolongadas (stop-the-world).
+Hipótesis:
+Si la aplicación se encuentra bajo una carga sostenida de usuarios que generan una alta creación de objetos en memoria heap, provocando que su uso supere el 85 % de la capacidad máxima configurada durante un periodo de 10 minutos,
+entonces la aplicación debería seguir operando sin degradaciones significativas en el rendimiento ni interrupciones en el servicio,
+porque el recolector de basura (Garbage Collector, GC) debe administrar eficientemente la memoria sin provocar pausas excesivas (Stop-The-World) ni generar errores de falta de memoria (OutOfMemoryError).
 
-Métricas de validación:
-Tiempo de recolección de basura (GC Pause Time): No debe exceder 500 ms en el 99th percentile.
-Frecuencia de GC: No debe dispararse por encima de X ejecuciones por minuto (dependiendo de la configuración del GC).
-OutOfMemoryErrors (OOM): No debe haber excepciones OOM durante la prueba.
-Tiempo de respuesta: No debe aumentar en más de 50 % respecto a condiciones normales.
+Criterios de validación:
+Pausas del GC:
+La duración de las pausas del GC no debe superar los 500 ms en el 99th percentile.
+El tiempo total dedicado a la recolección de basura no debe exceder el 10 % del tiempo total de ejecución.
+Frecuencia de GC:
+No debe incrementarse de forma abrupta, evitando una ejecución constante del GC (lo que indicaría problemas de presión de memoria).
+Errores de memoria:
+No debe generarse ninguna excepción de tipo java.lang.OutOfMemoryError.
+Impacto en la aplicación:
+El tiempo de respuesta medio de la aplicación no debe aumentar en más de un 50 % con respecto a la línea base medida en condiciones normales.
 
 ---------------------------------------------------------------------------------------------------------------------------
 
 Hipótesis para I/O de Disco Duro
-Si la tasa de escritura/lectura del disco aumenta un 300 % durante 10 minutos debido a una sobrecarga de logs y archivos temporales,
-entonces el sistema debería seguir respondiendo a solicitudes sin tiempos de espera excesivos ni bloqueos,
-porque la infraestructura debe contar con buffering, caché en memoria y optimización en la escritura de logs.
+Hipótesis:
+Si la aplicación experimenta un aumento repentino en la cantidad de operaciones de escritura y lectura en disco, provocando un incremento del 300 % en la carga de I/O durante un periodo de 10 minutos,
+entonces la aplicación debe seguir procesando las solicitudes sin generar tiempos de espera excesivos ni bloqueos en los procesos críticos,
+porque el sistema debe contar con mecanismos de buffering, caching en memoria y una estrategia eficiente de escritura en disco para minimizar la latencia de acceso.
 
-Métricas de validación:
-Latencia de acceso a disco: No debe superar X ms en el 95th percentile.
-Throughput de I/O: Debe mantenerse por encima de Y MB/s.
-TPS: No debe caer en más de un 20 % debido a esperas de escritura.
-Error Rate: No debe aumentar por bloqueos o timeout en acceso a disco.
+Criterios de validación:
+Latencia de acceso a disco:
+No debe superar X ms en el 95th percentile.
+Throughput de I/O:
+Debe mantenerse por encima de Y MB/s de escritura y Z MB/s de lectura sin degradación drástica.
+Impacto en el rendimiento:
+El tiempo de respuesta de la aplicación no debe incrementarse en más de un 30 % con respecto a su línea base.
+No debe haber un aumento significativo en los tiempos de espera (wait time) en el sistema operativo.
+Tasa de errores:
+No debe haber un aumento en el número de errores relacionados con timeouts o bloqueos en acceso a disco.
