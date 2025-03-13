@@ -1,0 +1,38 @@
+import org.apache.kafka.clients.admin.*;
+import org.apache.kafka.common.TopicPartition;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+
+public class KafkaQueueSize {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        String bootstrapServers = "localhost:9092"; // Reemplázalo con tu broker Kafka
+        String topic = "mi-topico"; // Reemplázalo con el nombre del tópico
+
+        Properties props = new Properties();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+        try (AdminClient adminClient = AdminClient.create(props)) {
+            // Obtener información de particiones
+            ListTopicsResult topics = adminClient.listTopics();
+            if (!topics.names().get().contains(topic)) {
+                System.out.println("El tópico no existe.");
+                return;
+            }
+
+            // Obtener el log end offset (último mensaje en la partición)
+            ListOffsetsResult endOffsets = adminClient.listOffsets(
+                    Collections.singletonMap(new TopicPartition(topic, 0), OffsetSpec.latest()));
+
+            // Obtener el log start offset (primer mensaje retenido)
+            ListOffsetsResult startOffsets = adminClient.listOffsets(
+                    Collections.singletonMap(new TopicPartition(topic, 0), OffsetSpec.earliest()));
+
+            long latestOffset = endOffsets.all().get().get(new TopicPartition(topic, 0)).offset();
+            long earliestOffset = startOffsets.all().get().get(new TopicPartition(topic, 0)).offset();
+
+            // Cantidad de mensajes encolados
+            long queueSize = latestOffset - earliestOffset;
+            System.out.println("Mensajes en cola en '" + topic + "': " + queueSize);
+        }
+    }
+}
