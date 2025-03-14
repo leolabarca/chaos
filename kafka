@@ -1,0 +1,45 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import java.util.List;
+
+public class KafkaConsumerLagScraper {
+    public static void main(String[] args) {
+        // Configurar la ubicación de ChromeDriver
+        System.setProperty("webdriver.chrome.driver", "C:\\ruta\\a\\chromedriver.exe"); // Cambia por tu ruta
+
+        // Configurar WebDriver
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Abrir Confluent Control Center
+            driver.get("http://localhost:9021");
+            Thread.sleep(5000); // Esperar para que la página cargue completamente
+
+            // Navegar a la sección de Consumer Groups
+            driver.get("http://localhost:9021/clusters/default/consumer-groups");
+            Thread.sleep(5000);
+
+            // Buscar filas en la tabla de Consumer Lag
+            List<WebElement> rows = driver.findElements(By.xpath("//table//tr"));
+
+            for (WebElement row : rows) {
+                List<WebElement> cols = row.findElements(By.tagName("td"));
+                if (cols.size() > 2) {
+                    String consumerGroup = cols.get(0).getText();  // Nombre del grupo de consumidores
+                    String topic = cols.get(1).getText();  // Nombre del tópico
+                    String lag = cols.get(2).getText();  // Lag del consumidor
+
+                    System.out.println("Grupo: " + consumerGroup + ", Tópico: " + topic + ", Lag: " + lag);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error al obtener datos: " + e.getMessage());
+        } finally {
+            // Cerrar el navegador
+            driver.quit();
+        }
+    }
+}
