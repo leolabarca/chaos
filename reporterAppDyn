@@ -25,25 +25,24 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.FileWriter;
-import java.util.Base64;
 
 public class AppDReporter {
 
-    private static final String CONTROLLER = "https://<tu-controller>:443";
-    private static final String USERNAME = "<usuario>@<cuenta>"; // ejemplo: leandro@citi
-    private static final String PASSWORD = "<token-o-password>";
-    private static final String APPLICATION = "NombreApp";
+    private static final String BEARER_TOKEN = "<TU_TOKEN_AQUI>";
+    private static final String CONTROLLER = "https://<tu-controller>";
+    private static final String APPLICATION = "NombreAppDynamics";
     private static final String METRIC = "Hardware Resources|CPU|%Used";
 
     public static void main(String[] args) throws Exception {
-        String auth = Base64.getEncoder().encodeToString((USERNAME + ":" + PASSWORD).getBytes());
+        String encodedMetric = METRIC.replace("|", "%7C").replace(" ", "%20");
+
         String url = CONTROLLER + "/controller/rest/applications/" + APPLICATION +
-                "/metric-data?metric-path=" + METRIC +
+                "/metric-data?metric-path=" + encodedMetric +
                 "&time-range-type=BEFORE_NOW&duration-in-mins=60&output=JSON";
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
-            request.setHeader("Authorization", "Basic " + auth);
+            request.setHeader("Authorization", "Bearer " + BEARER_TOKEN);
             request.setHeader("Accept", "application/json");
 
             var response = client.execute(request);
@@ -70,4 +69,3 @@ public class AppDReporter {
         }
     }
 }
-
