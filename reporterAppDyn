@@ -131,4 +131,32 @@ public class AppdClient {
         }
     }
 }
+---------------------------------------------------------------------------------------------------------
+
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import javax.net.ssl.SSLContext;
+import java.security.cert.X509Certificate;
+
+SSLContext sslContext = SSLContextBuilder.create()
+        .loadTrustMaterial((X509Certificate[] chain, String authType) -> true) // confía en todos
+        .build();
+
+SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
+
+try (CloseableHttpClient client = HttpClients.custom()
+        .setSSLSocketFactory(sslSocketFactory)  // ESTE ES EL CORRECTO
+        .build()) {
+
+    HttpGet request = new HttpGet(url);
+    request.setHeader("Authorization", "Bearer " + BEARER_TOKEN);
+    request.setHeader("Accept", "application/json");
+
+    ClassicHttpResponse response = client.executeOpen(null, request, null);
+    String json = EntityUtils.toString(response.getEntity());
+    System.out.println("Respuesta:");
+    System.out.println(json);
+}
 
