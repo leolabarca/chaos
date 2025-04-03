@@ -160,3 +160,30 @@ try (CloseableHttpClient client = HttpClients.custom()
     System.out.println(json);
 }
 
+
+---------------------------------------------------------------------------------------------------------------
+SSLContext sslContext = SSLContextBuilder.create()
+        .loadTrustMaterial((X509Certificate[] chain, String authType) -> true)
+        .build();
+
+SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
+
+HttpClientConnectionManager connManager = PoolingHttpClientConnectionManagerBuilder.create()
+    .setSSLSocketFactory(sslSocketFactory)
+    .build();
+
+try (CloseableHttpClient client = HttpClients.custom()
+        .setConnectionManager(connManager)
+        .build()) {
+
+    HttpGet request = new HttpGet(url);
+    request.setHeader("Authorization", "Bearer " + BEARER_TOKEN);
+    request.setHeader("Accept", "application/json");
+
+    ClassicHttpResponse response = client.executeOpen(null, request, null);
+    String json = EntityUtils.toString(response.getEntity());
+
+    // tu lógica de parseo JSON...
+}
+
+
