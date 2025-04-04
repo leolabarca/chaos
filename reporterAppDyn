@@ -216,3 +216,68 @@ Scenario: Performance test for the new Payments service
 Examples:
   | dominio                        | puerto | path                                | metodo | protocolo | tiempo | tipo              |
   | pagos-api.nsroot.net          | 8443   | /api/payments/execute               | POST   | https     | 2500   | application/json  |
+
+
+-----------------------------------------------Diego-------------------------------------------------------------------
+
+String body = hideBody();
+        System.out.println(body);
+
+        JSONArray jsonArr = new JSONArray(body.replaceFirst("\"", "\\\""));
+        //JSONObject jo = (JSONObject) jsonArr.get(3);
+        //System.out.println(jo.get("id"));
+
+        List<HashMap> list =jsonArr.toList().stream().map(o -> (HashMap) o).sorted(Comparator.comparingInt(o -> Integer.valueOf(o.get("time").toString().replace(":", "")))).toList();
+        List<String> ids = list.stream().map(o -> "\"" + ((HashMap) o).get("time").toString() + "\"").toList();
+        List<String> userId = list.stream().map(o -> ((HashMap)o).get("quantity").toString()).toList();
+
+        String data = "\n    labels = " + ids.subList(0,200) + ";\n    data = " + userId.subList(0,200) + ";\n";
+
+        File file = new File("C:\\Users\\Diego\\Desktop\\Projects\\html_graphs\\index.html");
+        System.out.println(LocalDateTime.ofEpochSecond(TimeUnit.MILLISECONDS.toSeconds(file.lastModified()),0, ZoneOffset.of("-6"))); //EST = UTC-5
+
+
+        Document doc = Jsoup.parse(file);
+        Element elem = doc.getElementById("data");
+        elem.text(data);
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write(doc.html());
+        writer.close();
+
+<!DOCTYPE html>
+    Message
+
+    <div style="width: 500px;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script id="data">
+
+    </script>
+
+    <script>
+
+        const ctx = document.getElementById('myChart');
+      
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Data',
+              data: data,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      </script>
