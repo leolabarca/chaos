@@ -203,3 +203,16 @@ System.out.println("Convertido a JSON:");
 System.out.println(json.toString(4)); // con identación
 
 
+---------------------------------------------------------------------------------------------------------
+@test3
+Scenario: Performance test for the new Payments service
+  When I prepare valid "PaymentsInput.xml" result
+  And I prepare project group suite name with "Payments Performance" "Prueba pagos"
+  And JMeterAgent executeSOAPWithParameter "<dominio>" "<puerto>" "<path>" "<metodo>" "<protocolo>" "<tiempo>" "<tipo>"
+  Then read JMeter test results from the file "JmeterTestResults.jtl"
+  And all responses should have status code 200
+  And all responses should have response time less than 2500 milliseconds
+
+Examples:
+  | dominio                        | puerto | path                                | metodo | protocolo | tiempo | tipo              |
+  | pagos-api.nsroot.net          | 8443   | /api/payments/execute               | POST   | https     | 2500   | application/json  |
