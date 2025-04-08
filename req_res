@@ -1,0 +1,62 @@
+POST https://processor.qa.newpay.com.ar/v1/transfer/cashin
+
+POST data:
+{
+    "transaction": {
+        "transfer_id": "1972105494636712",
+        "reference": "TEST",
+        "amount": {
+            "value": 0.01,
+            "currency": "ARS"
+        },
+        "type": "VAR"
+    },
+    "user": {
+        "name": "CLIENTE CON TARJETA",
+        "identification_number": "20714090456",
+        "issuer": "NRJX",
+        "document": {
+            "type": "DNI",
+            "number": "71409045"
+        },
+        "account_from": {
+            "cbu": "4530001500001332656975",
+            "account_type": "11",
+            "account_number": "1332656975"
+        }
+    },
+    "account_to": {
+        "name": "JORGE FRANCISCO VARGAS1",
+        "identification_number": [
+            "27182841175"
+        ],
+        "account": {
+            "cbu": "0168888100008247880229",
+            "cvu": "0000009300006508197846"
+        },
+        "account_type": "01",
+        "account_number": "0002000043503000002",
+        "issuer": "CMCT",
+        "issuer_link": "",
+        "issuer_name": "CMCT",
+        "cvu_data": {
+            "wallet": {
+                "name": "MERCADOPAGO",
+                "cuit": "30703088534",
+                "bcra_id": "33535"
+            },
+            "name": "USUARIO CVU",
+            "identification_number": [
+                "23216459059"
+            ],
+            "account_type": "01",
+            "account_number": "0661234579"
+        }
+    }
+}
+
+[no cookies]
+
+
+-----------------------------------------------------------------------------------------------------------------
+{"transfer_id":"1972105494636712","amount":{"value":0.01,"currency":"ARS"},"transaction":{"authorization_code":"MTC3MJ","reference_number":"779351330964","code":"APPROVED","description":"Transaccion Aprobada","date":"2025-04-08T11:12:37.284Z","type":"VAR"}}
