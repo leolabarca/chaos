@@ -1,4 +1,52 @@
- <dependencies>
+
+POST https://02qau28tkb.execute-api.us-east-1.amazonaws.com/v1/transfers/push
+
+POST data:
+{
+    "transfer_id": "1484629580201352043",
+    "amount": {
+        "value": "1023.9",
+        "currency": "ARS"
+    },
+    "user": {
+        "name": "Romina Andrea Sanchez",
+        "identification_number": "27326594305",
+        "document": {
+            "type": "DNI",
+            "number": "32659430"
+        },
+        "wallet": {
+            "name": "MercadoPago",
+            "cuit": "30703088534",
+            "bcra_id": "33535"
+        },
+        "account_from": {
+            "cbu": "0168888100008247880229",
+            "cvu": "0000009300098997862790"
+        }
+    },
+    "account_to": {
+        "account": {
+            "cbu": "0071418700000112939210"
+        },
+        "account_type": "01",
+        "account_number": "0000011293921",
+        "name": "CHAYANNE,CHAY",
+        "identification_number": ["20112939211"],
+        "issuer": "GLCA",
+        "issuer_link": "",
+        "issuer_name": "BANCO DE GALICIA"
+    },
+    "type": "VAR",
+    "channel": "STRING"
+}
+
+[no cookies]
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+<dependencies>
         <!-- Para hacer llamadas HTTP -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
