@@ -3,6 +3,18 @@ List<JSONObject> list = IntStream.range(0, jsonArr.length())
     .mapToObj(i -> new JSONObject(jsonArr.getString(i)))
     .collect(Collectors.toList());
 
+List<String> ids = list.stream()
+    .map(o -> o.get("startTimeInMillis").toString())
+    .collect(Collectors.toList());
+
+List<String> values = list.stream()
+    .map(o -> o.get("value").toString())
+    .collect(Collectors.toList());
+
+List<JSONObject> list = IntStream.range(0, jsonArr.length())
+    .mapToObj(i -> new JSONObject(jsonArr.getString(i)))
+    .collect(Collectors.toList());
+
 System.out.println("Tipo real: " + jsonArr.get(0).getClass().getName());
 
 List<JSONObject> list = IntStream.range(0, jsonArr.length())
