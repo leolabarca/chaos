@@ -1,3 +1,7 @@
+Implementing Jupyter Notebooks with Python for log analysis enables processing large volumes of data and visualizing detailed server-side activity. This approach provides deep traceability into internal server requests, helping identify bottlenecks and errors during performance tests and enhancing the overall analysis process with customizable, scriptable insights.
+
+Using Jupyter Notebooks with Python enhances system understanding by breaking down internal server requests. It helps identify root causes, correlate metrics, and optimize performance. This tool supports clearer, data-driven reports that improve decision-making during performance testing cycles.
+
 cashin 576973125555
 cashout 945111816315, 230654942000, 590504996526
 
