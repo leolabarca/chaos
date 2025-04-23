@@ -1,4 +1,8 @@
 
+List<JSONObject> list = IntStream.range(0, jsonArr.length())
+    .mapToObj(i -> new JSONObject(jsonArr.getString(i)))
+    .collect(Collectors.toList());
+
 System.out.println("Tipo real: " + jsonArr.get(0).getClass().getName());
 
 List<JSONObject> list = IntStream.range(0, jsonArr.length())
