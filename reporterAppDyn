@@ -1,4 +1,12 @@
 
+metric-data
+    ?metric-path=Application Infrastructure Performance|<Tier>|<Node>|Hardware Resources|CPU|%User
+    &time-range-type=BEFORE_NOW
+    &duration-in-mins=60
+    &rollup=false
+    &output=JSON
+
+
 List<JSONObject> list = IntStream.range(0, jsonArr.length())
     .mapToObj(i -> new JSONObject(jsonArr.getString(i)))
     .collect(Collectors.toList());
