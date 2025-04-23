@@ -1,3 +1,17 @@
+import xml.dom.minidom
+
+with open("C:/Lea/archivo.xml", "r") as f:
+    xml_data = f.read()
+
+dom = xml.dom.minidom.parseString(xml_data)
+pretty_xml = dom.toprettyxml()
+
+print(pretty_xml)
+
+
+---------------------------------
+
+
 
 import json
 
