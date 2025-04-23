@@ -1,3 +1,15 @@
+
+System.out.println("Tipo real: " + jsonArr.get(0).getClass().getName());
+
+List<JSONObject> list = IntStream.range(0, jsonArr.length())
+    .mapToObj(jsonArr::getJSONObject)
+    .collect(Collectors.toList());
+
+List<String> ids = list.stream()
+    .map(o -> o.get("startTimeInMillis").toString())  // o cualquier campo
+    .collect(Collectors.toList());
+--------------------------------------------------------------------------------
+
 import xml.dom.minidom
 
 with open("C:/Lea/archivo.xml", "r") as f:
