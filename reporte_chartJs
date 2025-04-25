@@ -1,3 +1,26 @@
+scales: {
+  y: {
+    beginAtZero: true,
+    title: {
+      display: true,
+      text: 'TPS', // Aquí va el texto del eje Y
+      color: '#666666',
+      font: {
+        size: 14,
+        weight: 'bold'
+      }
+    },
+    ticks: {
+      color: '#555'
+    },
+    grid: {
+      color: '#ddd'
+    }
+  },
+
+
+
+---------------------------------------
 plugins: {
   title: {
     display: true,
