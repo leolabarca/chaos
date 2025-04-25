@@ -1,3 +1,67 @@
+const labels = [
+  1745527020000, 1745526400000, 1745527200000,
+  1745526900000, 1745527320000, 1745527500000
+];
+
+const ctx = document.getElementById('myChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Load Response',
+      data: data,
+      borderColor: '#2980b9',
+      backgroundColor: 'rgba(41, 128, 185, 0.1)',
+      tension: 0.3,
+      pointBackgroundColor: '#2980b9',
+      pointBorderColor: '#fff',
+      pointRadius: 5,
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'minute',
+          tooltipFormat: 'HH:mm:ss',
+          displayFormats: {
+            minute: 'HH:mm'
+          }
+        },
+        ticks: {
+          color: '#555'
+        },
+        grid: {
+          color: '#eee'
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: '#555'
+        },
+        grid: {
+          color: '#ddd'
+        }
+      }
+    }
+  }
+});
+
+
+
+
+
+
+
+
+
+---------------------------------------------------
+
 <!DOCTYPE html>
 <html>
 <head>
