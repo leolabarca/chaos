@@ -1,3 +1,32 @@
+plugins: {
+  title: {
+    display: true,
+    text: 'Nombre de tu gráfico',
+    font: {
+      size: 20,
+      weight: 'bold',
+      family: 'Segoe UI'
+    },
+    color: '#2c3e50',
+    padding: {
+      top: 10,
+      bottom: 20
+    }
+  },
+  legend: {
+    display: true,
+    labels: {
+      color: '#333',
+      font: {
+        size: 14
+      }
+    }
+  },
+  tooltip: { ... }
+}
+
+
+
 const labels = [
   1745527020000, 1745526400000, 1745527200000,
   1745526900000, 1745527320000, 1745527500000
