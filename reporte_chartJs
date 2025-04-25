@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Corporate Line Chart</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      margin: 40px;
+    }
+    .chart-container {
+      width: 80%;
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <div class="chart-container">
+    <h2>Performance Line Chart</h2>
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const labels = [
+      "1745527020000", "1745526400000", "1745527200000", 
+      "1745526900000", "1745527320000", "1745527500000"
+    ];
+    const data = [4, 4, 5, 5, 6, 6];
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Load Response',
+          data: data,
+          borderColor: '#2980b9',
+          backgroundColor: 'rgba(41, 128, 185, 0.1)',
+          tension: 0.3,
+          pointBackgroundColor: '#2980b9',
+          pointBorderColor: '#fff',
+          pointRadius: 5,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: '#333',
+              font: {
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: '#2c3e50',
+            titleColor: '#fff',
+            bodyColor: '#ecf0f1',
+            borderColor: '#2980b9',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#555'
+            },
+            grid: {
+              color: '#ddd'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#555'
+            },
+            grid: {
+              color: '#eee'
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
