@@ -1,29 +1,40 @@
-// Agrega headers necesarios
-web_add_header("Authorization", "Bearer {AccessToken}");
-web_add_header("Content-Type", "application/json");
-web_add_header("Cookie", "7e9d7af7b67b1f79c82cd0180654b158=62e36ae4f82a35cfd6bbc3d36c90143");
+"Body={\r\n"
+"  \"apim\": {\r\n"
+"    \"clientId\": \"9a10a5d6-63d4-4885-b6bd-19e79629496d\",\r\n"
+"    \"guid\": \"3fa85f14-0202-4562-b3fd-2c963f66afaf\"\r\n"
+"  },\r\n"
+"  \"userId\": \"user id\",\r\n"
+"  \"source\": \"Postman\",\r\n"
+"  \"version\": \"1\",\r\n"
+"  \"messageTimeStamp\": \"2023-10-30T18:37:55.695Z\",\r\n"
+"  \"alias\": {\r\n"
+"    \"localBranch\": 1,\r\n"
+"    \"accountNumber\": 1000098,\r\n"
+"    \"taxId\": 56998700100116,\r\n"
+"    \"aliasStatus\": \"ACTIVE\"\r\n"
+"  },\r\n"
+"  \"calendario\": {\r\n"
+"    \"expiracao\": 432000\r\n"
+"  },\r\n"
+"  \"status\": \"ATIVA\",\r\n"
+"  \"devedor\": {\r\n"
+"    \"cnpj\": \"71408802000183\",\r\n"
+"    \"nome\": \"EVIDENCIA\"\r\n"
+"  },\r\n"
+"  \"valor\": {\r\n"
+"    \"original\": \"55.00\",\r\n"
+"    \"modalidadeAlteracao\": \"1\"\r\n"
+"  },\r\n"
+"  \"chave\": \"1d3cf821-db6d-496d-bec0-064a362e9c31\",\r\n"
+"  \"solicitacaoPagador\": \"SOLICITPGTO\",\r\n"
+"  \"infoAdicionais\": [\r\n"
+"    {\r\n"
+"      \"nome\": \"Campo 1\",\r\n"
+"      \"valor\": \"Informação Adicional1 do PSP-Recebedor\"\r\n"
+"    }\r\n"
+"  ]\r\n"
+"}",
 
-// Enviar el request PUT
-web_custom_request("Put_Request",
-    "URL=https://uat.tts.icgservices.citigroup.net/tts/internal/api/...",
-    "Method=PUT",
-    "Resource=0",
-    "RecContentType=application/json",
-    "Mode=HTTP",
-    "Body={\r\n"
-    "  \"apim\": {\r\n"
-    "    \"clientId\": \"9a10a5d6-63d4-4885-b6bd-19e79629496d\",\r\n"
-    "    \"guid\": \"3fa85f14-0202-4562-b3fd-2c963f66afaf\"\r\n"
-    "  },\r\n"
-    "  \"userId\": \"user id\",\r\n"
-    "  \"source\": \"Postman\",\r\n"
-    "  \"version\": \"1\",\r\n"
-    "  \"messageTimeStamp\": \"2023-10-30T18:37:55.695Z\",\r\n"
-    "  \"alias\": {\r\n"
-    "    \"localBranch\": 1\r\n"
-    "  }\r\n"
-    "}",
-    LAST);
 
 
 
