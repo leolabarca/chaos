@@ -1,0 +1,13 @@
+web_custom_request("Get_Token",
+    "URL=https://uat.tts.icgservices.citigroup.net/tts/internal/api/oauth2/token",
+    "Method=POST",
+    "Resource=0",
+    "RecContentType=application/json",
+    "Referer=",
+    "Mode=HTTP",
+    "EncType=application/x-www-form-urlencoded",
+    "Body=client_id=pX4zjR8dNnwOEaS93XKCEn7A6zCZBSKGSfA4lPOR6dSYgM&"
+          "client_secret=BITdnbEO0gxkzFaPo2GOxYtxlLR2Z9rUAFKOn6UKXja7CBr4gQ2rJVzxjFxlJPS&"
+          "scope=/api&"
+          "grant_type=client_credentials",
+    LAST);
