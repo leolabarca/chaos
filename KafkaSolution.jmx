@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.4.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Kafka Conector" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="Variables definidas por el Usuario" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Grupo de Hilos" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Controlador Bucle" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="false">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.apache.jmeter.protocol.java.sampler.JavaSamplerClient;
+import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.threads.JMeterVariables;
+import org.apache.jmeter.config.Arguments;
+import java.util.HashMap;
+import java.util.Map;
+
+public class KafkaConnectJSR223Sampler implements JavaSamplerClient {
+    
+    @Override
+    public Arguments getDefaultParameters() {
+        Arguments args = new Arguments();
+        args.addArgument(&quot;bootstrap.servers&quot;, &quot;10.233.35.16:1433&quot;); // Kafka broker address
+        args.addArgument(&quot;topic&quot;, &quot;TP_BFAL_CORP_CL_PAYMENTS_TRANSMNGT_CARD_JSON&quot;); // Kafka topic to which you want to send the JSON data
+        args.addArgument(&quot;jsonPayload&quot;, &quot;{\&quot;field1\&quot;:\&quot;value1\&quot;,\&quot;field2\&quot;:\&quot;value2\&quot;}&quot;); // JSON payload to send
+        return args;
+    }
+
+    @Override
+    public SampleResult runTest(JavaSamplerContext context) {
+        SampleResult result = new SampleResult();
+        result.sampleStart();
+
+        String bootstrapServers = context.getParameter(&quot;bootstrap.servers&quot;);
+        String topic = context.getParameter(&quot;topic&quot;);
+        String jsonPayload = context.getParameter(&quot;jsonPayload&quot;);
+
+        // Set up Kafka producer properties
+        Properties props = new Properties();
+        props.put(&quot;bootstrap.servers&quot;, bootstrapServers);
+        props.put(&quot;key.serializer&quot;, &quot;org.apache.kafka.common.serialization.StringSerializer&quot;);
+        props.put(&quot;value.serializer&quot;, &quot;org.apache.kafka.common.serialization.StringSerializer&quot;);
+
+        try {
+            // Create Kafka producer
+            KafkaProducer&lt;String, String&gt; producer = new KafkaProducer&lt;&gt;(props);
+
+            // Send JSON payload to Kafka topic
+            ProducerRecord&lt;String, String&gt; record = new ProducerRecord&lt;&gt;(topic, jsonPayload);
+            producer.send(record);
+
+            producer.close();
+
+            result.setResponseCodeOK();
+            result.setSuccessful(true);
+            result.setResponseMessage(&quot;JSON data sent to Kafka successfully&quot;);
+        } catch (Exception e) {
+            result.setResponseCode(&quot;500&quot;);
+            result.setSuccessful(false);
+            result.setResponseMessage(&quot;Error sending JSON data to Kafka: &quot; + e.getMessage());
+            e.printStackTrace();
+        }
+
+        result.sampleEnd();
+        return result;
+    }
+
+    @Override
+    public void setupTest(JavaSamplerContext context) {
+    }
+
+    @Override
+    public void teardownTest(JavaSamplerContext context) {
+    }
+}
+</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.serialization.StringSerializer
+
+def kafkaProperties = new Properties()
+kafkaProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, &quot;your_kafka_bootstrap_servers&quot;)
+kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName())
+kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName())
+
+def kafkaTopic = &quot;TP_BFAL_CORP_CL_PAYMENTS_TRANSMNGT_CARD_JSON&quot;
+
+def jsonData = &apos;&apos;&apos;
+{
+    &quot;Fields&quot;: {
+        &quot;11&quot;: &quot;520433&quot;,
+        &quot;114&quot;: &quot;0170190153741108107553810030018000000001323797206101003SVP10200400001040030021080090000000001130020114100101460030001470010151099                                                                                                   1650190000000000000000000174015               176060                                                            177050                                                  178090                                                                                          1790040000180018                  181060                                                            &quot;,
+        &quot;115&quot;: &quot;182050                                                  194012000592145300196015               197013             19800300019900300021500201225180                                                                                                                                                                                    226002002270040000228018000000000000000000229012000000000000230018000000000000000000231003   232003   233009         234002  235001T236015000000000000000237015000000000000000238015000000000000000239015000000000000000240015000000000000000241015000000000000000&quot;,
+        &quot;12&quot;: &quot;101251&quot;,
+        &quot;13&quot;: &quot;0627&quot;,
+        &quot;14&quot;: &quot;2706&quot;,
+        &quot;18&quot;: &quot;9399&quot;,
+        &quot;19&quot;: &quot;152&quot;,
+        &quot;2&quot;: &quot;512269******1169&quot;,
+        &quot;22&quot;: &quot;010&quot;,
+        &quot;25&quot;: &quot;07&quot;,
+        &quot;3&quot;: &quot;503000&quot;,
+        &quot;32&quot;: &quot;10010001632&quot;,
+        &quot;37&quot;: &quot;000000520433&quot;,
+        &quot;38&quot;: &quot;651011&quot;,
+        &quot;39&quot;: &quot;00&quot;,
+        &quot;4&quot;: &quot;000110387000&quot;,
+        &quot;41&quot;: &quot;00970001&quot;,
+        &quot;42&quot;: &quot;10009900       &quot;,
+        &quot;43&quot;: &quot;                                      CL&quot;,
+        &quot;49&quot;: &quot;152&quot;,
+        &quot;51&quot;: &quot;152&quot;,
+        &quot;6&quot;: &quot;000110387000&quot;,
+        &quot;67&quot;: &quot;00&quot;,
+        &quot;7&quot;: &quot;0627101211&quot;
+    },
+    &quot;Mti&quot;: &quot;0200&quot;
+}
+&apos;&apos;&apos;
+
+def kafkaProducer = new KafkaProducer&lt;String, String&gt;(kafkaProperties)
+def producerRecord = new ProducerRecord&lt;&gt;(kafkaTopic, jsonData)
+kafkaProducer.send(producerRecord)
+kafkaProducer.close()</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Ver Árbol de Resultados" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
