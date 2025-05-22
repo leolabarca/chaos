@@ -1,57 +1,46 @@
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.StringEntity;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.ssl.SSLContexts;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
+import java.net.URL;
 
-import javax.net.ssl.SSLContext;
-import java.io.File;
-
-public class SoapPostWithJKS {
+public class SoapCallWithKeystore {
 
     public static void main(String[] args) throws Exception {
-        String jksPath = "ruta/cliente.jks";
-        String jksPassword = "tu_password";
 
-        // SOAP body en XML (ajústalo según tu operación)
-        String soapBody =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ej=\"http://ejemplo.com/\">\n" +
-                "   <soapenv:Header/>\n" +
-                "   <soapenv:Body>\n" +
-                "      <ej:miOperacion>\n" +
-                "         <ej:parametro>valor</ej:parametro>\n" +
-                "      </ej:miOperacion>\n" +
-                "   </soapenv:Body>\n" +
-                "</soapenv:Envelope>";
+        // Propiedades SSL desde tu configuración JMeter
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+        System.setProperty("javax.net.ssl.trustStore", "C:/FASTEnvSetup/cacerts.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
 
-        // Crear SSLContext con el JKS
-        SSLContext sslContext = SSLContextBuilder.create()
-                .loadKeyMaterial(new File(jksPath), jksPassword.toCharArray(), jksPassword.toCharArray())
-                .build();
+        System.setProperty("javax.net.ssl.keyStoreType", "PKCS12");
+        System.setProperty("javax.net.ssl.keyStore", "C:/FASTEnvSetup/CertAndKey.pfx");
+        System.setProperty("javax.net.ssl.keyStorePassword", "C0l0mb14mutualUat2024");
 
-        try (CloseableHttpClient httpClient = HttpClients.custom()
-                .setSSLContext(sslContext)
-                .build()) {
+        // SOAP body
+        String soapBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                + "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"
+                + "  <soap:Body>"
+                + "    <ej:miOperacion xmlns:ej=\"http://ejemplo.com/\">"
+                + "      <ej:parametro>valor</ej:parametro>"
+                + "    </ej:miOperacion>"
+                + "  </soap:Body>"
+                + "</soap:Envelope>";
 
-            HttpPost post = new HttpPost("https://tuservicio.com/soapendpoint");
+        URL url = new URL("https://tuservicio.com/soapendpoint");
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        connection.setDoOutput(true);
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
+        connection.setRequestProperty("SOAPAction", "http://ejemplo.com/AccionSoap");
 
-            // Encabezados SOAP
-            post.setHeader("Content-Type", "text/xml;charset=UTF-8");
-            post.setHeader("SOAPAction", "http://ejemplo.com/AccionSoap");
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(soapBody.getBytes());
+        }
 
-            // Cuerpo de la petición
-            post.setEntity(new StringEntity(soapBody));
-
-            // Ejecutar la solicitud
-            try (CloseableHttpResponse response = httpClient.execute(post)) {
-                System.out.println("Código HTTP: " + response.getCode());
-                String responseBody = EntityUtils.toString(response.getEntity());
-                System.out.println("Respuesta SOAP: \n" + responseBody);
-            }
+        // Leer respuesta
+        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String line;
+        while ((line = br.readLine()) != null) {
+            System.out.println(line);
         }
     }
 }
