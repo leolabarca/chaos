@@ -1,0 +1,5 @@
+[ClientCertificate]
+UseClientCertificate=1
+ClientCertificateFilePath=C:\\Certs\\cliente.pfx
+ClientCertificatePassword=TuClave
+ClientCertificateType=PKCS12
